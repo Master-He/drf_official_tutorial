@@ -16,15 +16,20 @@ Including another URLconf
 from django.conf.urls import url, include
 from django.contrib import admin
 from rest_framework import routers
+from rest_framework.schemas import get_schema_view
 
 # from tutorial.quickstart import views
 # router = routers.DefaultRouter()
 # router.register(r'users', views.UserViewSet)
 # router.register(r'groups', views.GroupViewSet)
 
+schema_view = get_schema_view(title='Pastebin API')
+
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     # url(r'^', include(router.urls)),
     url(r'^', include('snippets.urls')),
-    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
+    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+
+    url('^schema/$', schema_view)
 ]
