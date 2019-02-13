@@ -2,7 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 from snippets.models import Snippet, LANGUAGE_CHOICES, STYLE_CHOICES
 
-
+# ================ 1
 # class SnippetSerializer(serializers.Serializer):
 #     id = serializers.IntegerField(read_only=True)
 #     title = serializers.CharField(required=False, allow_blank=True, max_length=100)
@@ -29,20 +29,39 @@ from snippets.models import Snippet, LANGUAGE_CHOICES, STYLE_CHOICES
 #         instance.save()
 #         return instance
 
-class SnippetSerializer(serializers.ModelSerializer):
+# ==========================2
+# class SnippetSerializer(serializers.ModelSerializer):
+#     owner = serializers.ReadOnlyField(source='owner.username')
+#     # source参数控制哪个属性用于填充字段，并且可以指向序列化实例上的任何属性。
+#     # ReadOnlyField 是无类型的，ReadOnlyField始终是只读的，只能用于序列化表示，不能用于在反序列化时更新模型实例。
+#     # 我们也可以在这里使用CharField(read_only=True)。
+#
+#     class Meta:
+#         model = Snippet
+#         fields = ('id', 'title', 'code', 'linenos', 'language', 'style', 'owner')
+#
+#
+# class UserSerializer(serializers.ModelSerializer):
+#     snippets = serializers.PrimaryKeyRelatedField(many=True, queryset=Snippet.objects.all())
+#
+#     class Meta:
+#         model = User
+#         fields = ('id', 'username', 'snippets')
+
+
+class SnippetSerializer(serializers.HyperlinkedModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
-    # source参数控制哪个属性用于填充字段，并且可以指向序列化实例上的任何属性。
-    # ReadOnlyField 是无类型的，ReadOnlyField始终是只读的，只能用于序列化表示，不能用于在反序列化时更新模型实例。
-    # 我们也可以在这里使用CharField(read_only=True)。
+    highlight = serializers.HyperlinkedIdentityField(view_name='snippet-highlight', format='html')
 
     class Meta:
         model = Snippet
-        fields = ('id', 'title', 'code', 'linenos', 'language', 'style', 'owner')
+        fields = ('url', 'id', 'highlight', 'owner',
+                  'title', 'code', 'linenos', 'language', 'style')
 
 
-class UserSerializer(serializers.ModelSerializer):
-    snippets = serializers.PrimaryKeyRelatedField(many=True, queryset=Snippet.objects.all())
+class UserSerializer(serializers.HyperlinkedModelSerializer):
+    snippets = serializers.HyperlinkedRelatedField(many=True, view_name='snippet-detail', read_only=True)
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'snippets')
+        fields = ('url', 'id', 'username', 'snippets')
