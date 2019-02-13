@@ -13,7 +13,7 @@ class JSONResponse(HttpResponse):
     """
     An HttpResponse that renders its content into JSON.
     """
-
+    # 需要将python 的数据类型转换成 json格式的字符串
     def __init__(self, data, **kwargs):
         content = JSONRenderer().render(data)
         kwargs['content_type'] = 'application/json'
@@ -21,15 +21,15 @@ class JSONResponse(HttpResponse):
 
 
 @csrf_exempt
-def snippet_list(request):
+def snippet_list(request):  # 这个request对象是HttpRequest对象
     if request.method == 'GET':
         snippets = Snippet.objects.all()
-        serializer = SnippetSerializer(snippets, many=True)
+        serializer = SnippetSerializer(snippets, many=True)  # 序列化多个对象
         return JSONResponse(serializer.data)
 
     elif request.method == 'POST':
         data = JSONParser().parse(request)
-        serializer = SnippetSerializer(data=data)
+        serializer = SnippetSerializer(data=data)  # 反序列化
         if serializer.is_valid():
             serializer.save()
             return JSONResponse(serializer.data, status=201)
